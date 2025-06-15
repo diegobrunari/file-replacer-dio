@@ -1,24 +1,16 @@
 package br.com.dio.persistence;
 
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class NIO2FilePersistence implements FilePersistence{
-
-    private final String currentDir = System.getProperty("user.dir");
-    private final String storedDir = "/managerFiles/NIO2/";
-    private final String fileName;
+public class NIO2FilePersistence extends FilePersistence{
 
     public NIO2FilePersistence(String fileName) throws IOException {
-        this.fileName = fileName;
+        super(fileName, "/managerFiles/NIO2/");
         var path = Paths.get(currentDir + storedDir);
         if(!Files.exists(path)){
             Files.createDirectory(path);
@@ -36,32 +28,6 @@ public class NIO2FilePersistence implements FilePersistence{
             ex.printStackTrace();
         }
         return data;
-    }
-
-    @Override
-    public boolean remove(String sentence) {
-        var contentList = toListString();
-
-        if(contentList.stream().noneMatch(c -> c.contains(sentence))) return false;
-
-        clearFile();
-        contentList.stream()
-                .filter(c -> !c.contains(sentence))
-                .forEach(this::write);
-        return true;
-    }
-
-    @Override
-    public String replace(String oldContent, String newContent) {
-        var contentList = toListString();
-
-        if(contentList.stream().noneMatch(c -> c.contains(oldContent))) return "";
-
-        clearFile();
-        contentList.stream()
-                .map(c -> c.contains(oldContent) ? newContent : c)
-                .forEach(this::write);
-        return newContent;
     }
 
     @Override
@@ -83,17 +49,5 @@ public class NIO2FilePersistence implements FilePersistence{
                 .filter(c -> c.contains(sentence))
                 .findFirst()
                 .orElse("");
-    }
-
-    private List<String> toListString() {
-        var content = findAll();
-        return new ArrayList<>(Stream.of(content.split(System.lineSeparator())).toList());
-    }
-
-    private void clearFile(){
-        try(OutputStream outputStream = new FileOutputStream(currentDir + storedDir + fileName)){
-        } catch (IOException ex){
-            ex.printStackTrace();
-        }
     }
 }
